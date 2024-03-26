@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Insert Item</title>
+    </head>
+    <body>
+        <div>
+            <h1>Adding items</h1>
+            <form action="{{url_for('insert_item_details')}}" id="insert_form" method="post"> <br/> <br/>
+                <label>Item Name: </label><input type="text" id="name" name="name" placeholder="item name" required/> <br/> <br/>
+                <label>Item Description: </label><input type="text" id="description" name="description" placeholder="item description" required/> <br/> <br/>
+                <label>Item Cost Price: </label><input type="number" id="cost_price" name="cost_price" placeholder="item cost price" require/> <br/> <br/>
+                <label>Item Selling Price: </label><input type="number" id="selling_price" name="selling_price" placeholder="item selling price" required/> <br/> <br/>
+                <label>Stock Keeping Unit: </label><input type="number" id="sku" name="sku" placeholder="Stock Keeping Unit" required/> <br/> <br/>
+                <label>Initial Stock: </label><input type="number" id="initial_stock" name="initial_stock" placeholder="initial stock count" required/> <br/> <br/>
+                <label>Reorder Point: </label><input type="number" id="reorder_point" name="reorder_point" placeholder="stock reorder point" required/> <br/> <br/>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </body>
+</html>
