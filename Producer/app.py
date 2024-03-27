@@ -23,6 +23,30 @@ channel.queue_bind(exchange='microservices', queue='insert_item', routing_key='i
 def index():
     return render_template("index.html")
 
+# Health check endpoint
+@app.route('/health', methods=['GET'])
+def health_check():
+    # Check RabbitMQ health
+    rabbitmq_status = check_rabbitmq_health()
+
+    # Determine overall health status
+    if rabbitmq_status['status'] == 'ok':
+        overall_status = 'ok'
+    else:
+        overall_status = 'error'
+
+    return jsonify({'status': overall_status})
+
+# Function to check RabbitMQ health
+def check_rabbitmq_health():
+    try:
+        # Establish connection to RabbitMQ
+        connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
+        connection.close()
+        return {'status': 'ok', 'details': 'RabbitMQ connection successful'}
+    except Exception as e:
+        return {'status': 'error', 'details': str(e)}
+
 @app.route('/insert_item', methods=['GET'])
 def insert_item():
     return render_template("insert.html", message='Insert form rendered')
@@ -48,7 +72,7 @@ def insert_item_details():
     return render_template("insert.html", message="Item inserted successfully")
 
 # Endpoint for order processing
-@app.route('order_processingr', methods=['POST'])
+@app.route('/order_processing', methods=['POST'])
 def order_processing():
     return jsonify({'status': 'success', 'message': 'Order processed successfully'})
 

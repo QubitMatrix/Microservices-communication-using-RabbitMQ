@@ -29,6 +29,11 @@ services:
     networks:
       - test_network
 
+  consumer_health_check:
+    build: ./Consumer_1
+    depends_on:
+      - rabbitmq
+
   consumer_insert_item:
     build: Consumer_2/
     depends_on:
