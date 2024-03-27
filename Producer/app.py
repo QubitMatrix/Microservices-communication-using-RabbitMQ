@@ -80,9 +80,10 @@ def insert_item_details():
     return render_template("insert.html", message="Item inserted successfully")
 
 # Endpoint for order processing
-@app.route('/order_processing', methods=['POST'])
+@app.route('/order_processing', methods=['GET'])
 def order_processing():
-    return jsonify({'status': 'success', 'message': 'Order processed successfully'})
+    return render_template("read.html")
+    # return jsonify({'status': 'success', 'message': 'Order processed successfully'})
 
 @app.route('/stock_management',methods=['GET'])
 def stock_management():
