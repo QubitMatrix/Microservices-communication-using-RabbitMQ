@@ -32,7 +32,10 @@ services:
   consumer_health_check:
     build: ./Consumer_1
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - test_network
 
   consumer_insert_item:
     build: Consumer_2/
@@ -53,5 +56,8 @@ services:
   consumer_order_processing:
     build: ./Consumer_4
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - test_network
 
