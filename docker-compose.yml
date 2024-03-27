@@ -41,6 +41,14 @@ services:
         condition: service_healthy
     networks:
       - test_network
+
+  consumer_stock_management:
+    build: Consumer_3/
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - test_network
   
   consumer_order_processing:
     build: ./Consumer_4

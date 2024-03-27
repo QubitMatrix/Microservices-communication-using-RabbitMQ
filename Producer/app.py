@@ -15,9 +15,17 @@ parameters = pika.ConnectionParameters(host="rabbitmq", port=5672, credentials=c
 connection = pika.BlockingConnection(parameters=parameters)
 channel = connection.channel()
 
+
 channel.exchange_declare(exchange='microservices', exchange_type='direct', durable=True)
+
+#insert_item
 channel.queue_declare(queue="insert_item", durable=True)
 channel.queue_bind(exchange='microservices', queue='insert_item', routing_key='insert_item')
+
+#stock_management
+channel.queue_declare(queue="stock_manage", durable=True)
+channel.queue_bind(exchange='microservices', queue='stock_manage', routing_key='stock_manage')
+
 
 @app.route('/')
 def index():
@@ -75,6 +83,10 @@ def insert_item_details():
 @app.route('/order_processing', methods=['POST'])
 def order_processing():
     return jsonify({'status': 'success', 'message': 'Order processed successfully'})
+
+@app.route('/stock_management',methods=['GET'])
+def stock_management():
+    return render_template("stock_manage.html")
 
 
 if __name__ == '__main__':
