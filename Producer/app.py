@@ -1,6 +1,6 @@
 import json
 import logging
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 import pika
 
 app = Flask(
@@ -46,6 +46,11 @@ def insert_item_details():
     channel.basic_publish(exchange='microservices', routing_key='insert_item', body=message)
 
     return render_template("insert.html", message="Item inserted successfully")
+
+# Endpoint for order processing
+@app.route('/process_order', methods=['POST'])
+def process_order():
+    return jsonify({'status': 'success', 'message': 'Order processed successfully'})
 
 
 if __name__ == '__main__':
