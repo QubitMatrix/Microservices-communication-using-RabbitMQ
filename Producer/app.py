@@ -48,8 +48,8 @@ def insert_item_details():
     return render_template("insert.html", message="Item inserted successfully")
 
 # Endpoint for order processing
-@app.route('/process_order', methods=['POST'])
-def process_order():
+@app.route('order_processingr', methods=['POST'])
+def order_processing():
     return jsonify({'status': 'success', 'message': 'Order processed successfully'})
 
 
