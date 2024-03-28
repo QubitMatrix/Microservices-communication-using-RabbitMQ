@@ -13,7 +13,10 @@ channel = connection.channel()
 channel.queue_declare(queue='stock_manage', durable=True)
 
 def manage(ch, method, properties, body):
+    body = body.decode()
+    body = json.loads(body)
     logging.debug("in consumer3")
+    logging.debug("Item name: "+body['name']+", SKU: "+body['sku']+", Used stock: "+body['used_stock'])
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
 channel.basic_consume(queue="stock_manage", on_message_callback=manage)
