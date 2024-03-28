@@ -6,5 +6,9 @@
     </head>
     <body>
         <h1>Stock Management</h1>
+        <form action="{{url_for('stock_management_details')}}" id="stock_form" method="POST">
+            <input type="number" name="sku" placeholder="item sku number"/>
+            <button type="submit" >Submit</button>
+        </form>
     </body>
 </html>

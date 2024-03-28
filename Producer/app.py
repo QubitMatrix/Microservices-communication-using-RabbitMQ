@@ -89,6 +89,13 @@ def order_processing():
 def stock_management():
     return render_template("stock_manage.html")
 
+@app.route('/stock_management_details',methods=['POST'])
+def stock_management_details():
+    sku=request.form['sku']
+    logging.debug("In stock_management_details")
+    logging.debug(sku)
+
+    return render_template("stock_manage.html")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
