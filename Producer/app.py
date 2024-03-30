@@ -55,10 +55,12 @@ def check_rabbitmq_health():
     except Exception as e:
         return {'status': 'error', 'details': str(e)}
 
+# End-point to fill form for create new item
 @app.route('/insert_item', methods=['GET'])
 def insert_item():
     return render_template("insert.html", message='Insert form rendered')
 
+# End-point to access form data and process it
 @app.route('/insert_item_details', methods=['POST'])
 def insert_item_details():
     name=request.form['name']
@@ -69,13 +71,11 @@ def insert_item_details():
     initial_stock=request.form['initial_stock']
     reorder_point=request.form['reorder_point']
 
-    print(name,description, sku, cost_price, selling_price, initial_stock, reorder_point)
     message = json.dumps({'name': name, 'description': description, 'sku': sku, 'cost_price': cost_price, 'selling_price': selling_price, 'initial_stock': initial_stock, 'reorder_point': reorder_point})
-    print(message)
     logging.debug("check1")
     logging.info(message)
     
-    channel.basic_publish(exchange='microservices', routing_key='insert_item', body=message)
+    channel.basic_publish(exchange='microservices', routing_key='insert_item', body=message) # publish item details to insert_item queue
 
     return render_template("insert.html", message="Item inserted successfully")
 
