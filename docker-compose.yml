@@ -1,5 +1,8 @@
 version: "3.8"
 
+volumes:
+  mongodata:
+  
 networks:
   test_network:
     driver: bridge
@@ -19,6 +22,26 @@ services:
     networks:
       - test_network
   
+  mongodb:
+    image: mongo
+    hostname: mongo_db
+    ports:
+      - "27017:27017"
+    restart: always
+    logging:
+      driver: none
+    volumes:
+      - mongodata:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - test_network
+    
+
   producer:
     build: Producer/
     ports:
@@ -36,12 +59,14 @@ services:
         condition: service_healthy
     networks:
       - test_network
-
+  
   consumer_insert_item:
     build: Consumer_2/
     depends_on:
       rabbitmq:
         condition: service_healthy
+    links:
+      - mongodb
     networks:
       - test_network
 
