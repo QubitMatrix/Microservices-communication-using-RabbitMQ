@@ -1,15 +1,31 @@
 import pika
+import time
+import logging
 
-connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
+# RabbitMQ setup
+credentials = pika.PlainCredentials(username='guest', password='guest')
+parameters = pika.ConnectionParameters(host='rabbitmq', port=5672, credentials=credentials)
+connection = pika.BlockingConnection(parameters=parameters)
 channel = connection.channel()
 
-channel.queue_declare(queue='health_check')
+# Display debug info
+logging.basicConfig(level=logging.DEBUG)
 
+# Declare the queue
+channel.queue_declare(
+    queue='health_check',
+    durable=True
+)
+
+# Callback function
 def callback(ch, method, properties, body):
-    print("Health check message received:", body.decode())
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+    print(" [x] Received %r" % body)
+    time.sleep(body.count(b'.'))
+    print(" [x] Done")
+    ch.basic_ack(delivery_tag = method.delivery_tag)
 
-channel.basic_consume(queue='health_check', on_message_callback=callback, auto_ack=True)
+# Consume the queue
+channel.basic_consume(queue='health_check', on_message_callback=callback)
 
-print('Waiting for messages...')
+print(' [*] Waiting for messages. To exit press CTRL+C')
 channel.start_consuming()
