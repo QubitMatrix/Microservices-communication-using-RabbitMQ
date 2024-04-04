@@ -27,14 +27,15 @@ def callback(ch, method, properties, body):
     selling_price = body['selling_price']
     initial_stock = body['initial_stock']
     reorder = body['reorder_point']
+    cur_stock=int(initial_stock)
 
     logging.debug("in consumer2")
-    logging.debug("{Item Name: "+name+", Description: "+desc+", SKU: "+sku+", Cost_price: "+cost_price+", Selling_price: "+selling_price+", Initial Stock: "+initial_stock+", Reorder: "+reorder+"}")
+    logging.debug("{Item Name: "+name+", Description: "+desc+", SKU: "+sku+", Cost_price: "+cost_price+", Selling_price: "+selling_price+", Initial Stock: "+initial_stock+", Reorder: "+reorder+", Current Stock: "+initial_stock+"}")
     
     client = pymongo.MongoClient("mongodb://mongo_db:27017")
     db = client['microservices_db']
     collection = db['item_details']
-    record = {"Name": name, "Description": desc, "SKU": sku, "Cost Price": cost_price, "Selling Price": selling_price, "Initial Stock": initial_stock, "Reorder Point": reorder}
+    record = {"Name": name, "Description": desc, "SKU": sku, "Cost Price": cost_price, "Selling Price": selling_price, "Initial Stock": initial_stock, "Reorder Point": reorder, "Current Stock": cur_stock}
     logging.debug("Before mongo insert")
     collection.insert_one(record)
     logging.debug("After mongo insert")
