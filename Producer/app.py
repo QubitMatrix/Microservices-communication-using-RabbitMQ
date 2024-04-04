@@ -26,6 +26,11 @@ channel.queue_bind(exchange='microservices', queue='insert_item', routing_key='i
 channel.queue_declare(queue="stock_manage", durable=True)
 channel.queue_bind(exchange='microservices', queue='stock_manage', routing_key='stock_manage')
 
+#order_processing
+channel.queue_declare(queue='send_database', durable=True)
+channel.queue_declare(queue="read_database", durable=True)
+channel.queue_bind(exchange='microservices', queue='read_database', routing_key='read_database')
+
 
 @app.route('/')
 def index():
@@ -80,10 +85,24 @@ def insert_item_details():
     return render_template("insert.html", message="Item inserted successfully")
 
 # Endpoint for order processing
-@app.route('/order_processing', methods=['GET'])
-def order_processing():
-    return render_template("read.html")
-    # return jsonify({'status': 'success', 'message': 'Order processed successfully'})
+@app.route('/read_database', methods=['GET'])
+def read_database():
+    # Publish message to read_database queue
+    channel.basic_publish(exchange='microservices', routing_key='read_database', body='Read database request')
+
+    return render_template('read.html', message='Read Database message sent!')
+
+@app.route('/read_database_actually', methods=['GET'])
+def read_database_actually():
+    # Fetch records from RabbitMQ (send_database queue)
+    method_frame, header_frame, body = channel.basic_get(queue='send_database')
+    channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+
+    # Deserialize JSON data
+    records = json.loads(body.decode())
+
+    # Return the records as JSON response
+    return jsonify(records)
 
 @app.route('/stock_management',methods=['GET'])
 def stock_management():
