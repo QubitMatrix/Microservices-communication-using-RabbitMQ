@@ -15,6 +15,8 @@ channel = connection.channel()
 
 #channel.exchange_declare(exchange='microservices', exchange_type='direct', durable=True)
 channel.queue_declare(queue='stock_manage', durable=True)
+channel.queue_declare(queue="process_order", durable=True)
+
 
 #for reading
 #channel.queue_declare(queue='stock_read', durable=True)
@@ -55,6 +57,22 @@ def send_to_stock_display(data):
 #channel.basic_consume(queue="read_db", on_message_callback=check)
 
 channel.basic_consume(queue="stock_manage", on_message_callback=manage)
+
+def update_db(ch,method,properties, body):
+    body = body.decode()
+    body = json.loads(body)
+    sku=body['SKU']
+    count_neg = body['order_count']
+    logging.debug("update:"+count_neg)
+    count_neg = -1*int(count_neg)
+    channel.basic_ack(delivery_tag=method.delivery_tag)
+    client = pymongo.MongoClient("mongodb://mongo_db:27017")
+    db = client['microservices_db']
+    collection = db['item_details']
+    collection.find({'SKU':sku},{"_id":0})
+    collection.update_one({'SKU':sku},{"$inc":{'Current Stock':count_neg}})
+
+channel.basic_consume(queue="process_order", on_message_callback=update_db)
 print("Waiting for message")
 channel.start_consuming()
 
