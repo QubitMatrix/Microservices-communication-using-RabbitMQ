@@ -35,6 +35,8 @@ channel.queue_bind(exchange='microservices', queue='stock_manage', routing_key='
 channel.queue_declare(queue='send_database', durable=True)
 channel.queue_declare(queue="read_database", durable=True)
 channel.queue_bind(exchange='microservices', queue='read_database', routing_key='read_database')
+channel.queue_declare(queue="process_order", durable=True)
+channel.queue_bind(exchange='microservices', queue='process_order', routing_key='process_order')
 
 
 @app.route('/')
@@ -74,12 +76,23 @@ def insert_item_details():
     return render_template("insert.html", message="Item inserted successfully")
 
 # Endpoint for order processing
-@app.route('/read_database', methods=['GET'])
+@app.route('/read_database', methods=['GET', 'POST'])
 def read_database():
+    # Receive order details and publish to process_order queue
+    logging.debug("req"+request.method)
+    if(request.method=='POST'):
+        logging.debug("req"+request.method)
+        sku=request.form['sku']
+        count=request.form['order_count']
+        message = json.dumps({'SKU':sku, "order_count":count})
+        logging.debug("sku:"+sku)
+        logging.debug("count:"+count)
+        channel.basic_publish(exchange='microservices', routing_key='process_order', body=message)
+        return render_template("index.html")
     # Publish message to read_database queue
-    channel.basic_publish(exchange='microservices', routing_key='read_database', body='Read database request')
-
-    return render_template('read.html', message='Read Database message sent!')
+    else:
+        channel.basic_publish(exchange='microservices', routing_key='read_database', body='Read database request')
+        return render_template('read.html', message='Read Database message sent!')
 
 @app.route('/read_database_actually', methods=['GET'])
 def read_database_actually():
@@ -104,6 +117,7 @@ def stock_management_details():
     logging.debug(sku)
 
     return render_template("stock_manage.html")
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

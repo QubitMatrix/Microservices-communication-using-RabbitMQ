@@ -28,6 +28,10 @@
 
     <!-- Load Bootstrap and Fetch data from server -->
     <script>
+        function fun()
+        {
+            alert("Successfully placed order")
+        }
         // Ensure that the DOM content is loaded before executing JavaScript code
         document.addEventListener('DOMContentLoaded', function() {
             // Fetch records from RabbitMQ (send_database queue)
@@ -49,6 +53,9 @@
                             <td>${record['Selling Price']}</td>
                             <td>${record['Initial Stock']}</td>
                             <td>${record['Reorder Point']}</td>
+                            <td><form action="{{url_for('read_database')}}" id="order_form" method="post">
+                                <input type="number" id="order_count" name="order_count" placeholder="Order Count" required/> <input type="hidden" name="sku" value="${record.SKU}"/> <button type="submit" onclick="fun()">Place Order</button>
+                            </form></td>
                         `;
                         tableBody.appendChild(row);
                     });
