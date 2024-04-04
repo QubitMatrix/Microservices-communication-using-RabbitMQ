@@ -75,6 +75,8 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    links:
+      - mongodb
     networks:
       - test_network
   
