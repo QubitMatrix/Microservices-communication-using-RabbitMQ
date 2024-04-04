@@ -28,6 +28,10 @@ channel.queue_declare(queue="insert_item", durable=True)
 channel.queue_bind(exchange='microservices', queue='insert_item', routing_key='insert_item')
 
 #stock_management
+#channel.queue_declare(queue="stock_manage", durable=True)
+#channel.queue_bind(exchange='microservices', queue='stock_manage', routing_key='stock_manage')
+
+channel.queue_declare(queue='stock_read', durable=True)
 channel.queue_declare(queue="stock_manage", durable=True)
 channel.queue_bind(exchange='microservices', queue='stock_manage', routing_key='stock_manage')
 
@@ -106,18 +110,44 @@ def read_database_actually():
     # Return the records as JSON response
     return jsonify(records)
 
-@app.route('/stock_management',methods=['GET'])
+@app.route('/stock_management',methods=['GET','POST'])
 def stock_management():
+    if request.method =='POST':
+        sku=request.form['sku']
+        logging.debug("In stock_management_details")
+        logging.debug("hijk:"+sku)
+        message=json.dumps({'sku':sku})
+
+        channel.basic_publish(exchange='microservices', routing_key='stock_manage', body=message)
+        return render_template("stock_manage.html")
+        
     return render_template("stock_manage.html")
 
-@app.route('/stock_management_details',methods=['POST'])
+
+'''@app.route('/stock_management_details',methods=['POST'])
 def stock_management_details():
     sku=request.form['sku']
     logging.debug("In stock_management_details")
     logging.debug(sku)
+    message=json.dumps({'sku':sku})
 
-    return render_template("stock_manage.html")
+    channel.basic_publish(exchange='microservices', routing_key='stock_manage', body=message)
+    return render_template("stock_manage.html")'''
 
+'''def check(ch,method,properties,body):
+    body = body.decode()
+    body = json.loads(body)
+    logging.debug("check1"+body['name'])
+    logging.debug("check2"+body['class'])
+    ch.basic_ack(delivery_tag=method.delivery_tag)'''
+@app.route('/stock_display',methods=['GET'])
+def stock_display():
+    method_frame, header_frame, body = channel.basic_get(queue='stock_read')
+    channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+    records = json.loads(body.decode())
+    logging.debug("check3")
+    return jsonify(records)
+    
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

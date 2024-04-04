@@ -6,9 +6,42 @@
     </head>
     <body>
         <h1>Stock Management</h1>
-        <form action="{{url_for('stock_management_details')}}" id="stock_form" method="POST">
+        <form action="{{url_for('stock_management')}}" id="stock_form" method="POST">
             <input type="number" name="sku" placeholder="item sku number"/>
             <button type="submit" >Submit</button>
         </form>
+
+        <div id="data"></div>
     </body>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script>
+        window.addEventListener('load',function(){
+            var req=new XMLHttpRequest();
+            req.open('GET','http://localhost:5000/stock_display');
+            req.responseType='json';
+            req.onload=function(){
+                if(req.status==200){
+                    var data = req.response;
+                    console.log(data);
+                    for (var i = 0; i < data.length; i++){
+                        var new_div=document.createElement('p');
+                        new_div.style.whiteSpace = 'pre-wrap';
+                        var rec=data[i];
+                        new_div.textContent="SKU: "+rec.SKU+"\n"+"Current Stock:"+rec["Current Stock"]+"\n"+"Reorder Point:"+rec["Reorder Point"]+"\n";
+                        console.log(parseInt(rec["Current Stock"]))
+                        if(parseInt(rec["Current Stock"])<parseInt(rec["Reorder Point"]))
+                        {
+                            new_div.textContent+="LOW STOCK"+"\n";
+                        }
+                        else{
+                            new_div.textContent+="IN STOCK"+"\n";
+                        }
+                        document.getElementById('data').appendChild(new_div);
+                    }
+                }
+            };
+            req.send();
+        })
+    </script>
 </html>
