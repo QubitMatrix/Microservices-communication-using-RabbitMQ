@@ -18,6 +18,11 @@ channel = connection.channel()
 
 channel.exchange_declare(exchange='microservices', exchange_type='direct', durable=True)
 
+
+# health check
+channel.queue_declare(queue='health_check', durable=True)
+channel.queue_bind(exchange='microservices', queue='health_check', routing_key='health_check')
+
 #insert_item
 channel.queue_declare(queue="insert_item", durable=True)
 channel.queue_bind(exchange='microservices', queue='insert_item', routing_key='insert_item')
@@ -37,28 +42,12 @@ def index():
     return render_template("index.html")
 
 # Health check endpoint
-@app.route('/health', methods=['GET'])
+@app.route('/health_check', methods=['GET'])
 def health_check():
-    # Check RabbitMQ health
-    rabbitmq_status = check_rabbitmq_health()
-
-    # Determine overall health status
-    if rabbitmq_status['status'] == 'ok':
-        overall_status = 'ok'
-    else:
-        overall_status = 'error'
-
-    return jsonify({'status': overall_status})
-
-# Function to check RabbitMQ health
-def check_rabbitmq_health():
-    try:
-        # Establish connection to RabbitMQ
-        connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq'))
-        connection.close()
-        return {'status': 'ok', 'details': 'RabbitMQ connection successful'}
-    except Exception as e:
-        return {'status': 'error', 'details': str(e)}
+    message = 'RabbitMQ connection established successfully'
+    # Publish message to health_check queue
+    channel.basic_publish(exchange='microservices', routing_key='health_check', body=message)
+    return 'Health Check message sent!'
 
 # End-point to fill form for create new item
 @app.route('/insert_item', methods=['GET'])
