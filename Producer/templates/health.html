@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Health Check</title>
+</head>
+<body>
+    <button id="healthCheckButton">Perform Health Check</button>
+
+    <script>
+        document.getElementById('healthCheckButton').addEventListener('click', function() {
+            fetch('/health_check')
+                .then(response => {
+                    if (response.ok) {
+                        console.log('Health check request successful');
+                    } else {
+                        console.error('Health check request failed');
+                    }
+                })
+                .catch(error => console.error('Error performing health check:', error));
+        });
+    </script>
+</body>
+</html>
